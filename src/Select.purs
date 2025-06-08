@@ -10,7 +10,6 @@ import Prelude
 import Control.Monad.Free (liftF)
 import Data.Const (Const)
 import Data.Maybe (Maybe(..), fromMaybe)
-import Data.Symbol (SProxy(..))
 import Data.Time.Duration (Milliseconds)
 import Data.Traversable (for_, traverse, traverse_)
 import Effect.Aff (Fiber, delay, error, forkAff, killFiber)
@@ -24,6 +23,7 @@ import Halogen.HTML as HH
 import Halogen.Query.ChildQuery (ChildQueryBox)
 import Prim.Row as Row
 import Record.Builder as Builder
+import Type.Prelude (Proxy(..))
 import Unsafe.Coerce (unsafeCoerce)
 import Web.Event.Event (preventDefault)
 import Web.HTML.HTMLElement as HTMLElement
@@ -73,6 +73,7 @@ type Slot' = Slot (Const Void) () Void
 -- | Represents a way to navigate on `Highlight` events: to the previous
 -- | item, next item, or the item at a particular index.
 data Target = Prev | Next | Index Int
+
 derive instance eqTarget :: Eq Target
 
 -- | Represents whether the component should display the item container. You
@@ -82,6 +83,7 @@ derive instance eqTarget :: Eq Target
 -- | render state = if state.visibility == On then renderAll else renderInputOnly
 -- | ```
 data Visibility = Off | On
+
 derive instance eqVisibility :: Eq Visibility
 derive instance ordVisibility :: Ord Visibility
 
@@ -98,7 +100,7 @@ type State st =
   , debounceRef :: Maybe (Ref (Maybe Debouncer))
   , visibility :: Visibility
   , highlightedIndex :: Maybe Int
-  , getItemCount :: {| st } -> Int
+  , getItemCount :: { | st } -> Int
   | st
   }
 
@@ -111,7 +113,7 @@ type Input st =
   { inputType :: InputType
   , search :: Maybe String
   , debounceTime :: Maybe Milliseconds
-  , getItemCount :: {| st } -> Int
+  , getItemCount :: { | st } -> Int
   | st
   }
 
@@ -126,39 +128,37 @@ type HalogenM st action slots msg m a =
 
 type Spec st query action slots input msg m =
   { -- usual Halogen component spec
-    render
-      :: State st
+    render ::
+      State st
       -> ComponentHTML action slots m
 
-    -- handle additional actions provided to the component
-  , handleAction
-      :: action
+  -- handle additional actions provided to the component
+  , handleAction ::
+      action
       -> HalogenM st action slots msg m Unit
 
-    -- handle additional queries provided to the component
-  , handleQuery
-      :: forall a
+  -- handle additional queries provided to the component
+  , handleQuery ::
+      forall a
        . query a
       -> HalogenM st action slots msg m (Maybe a)
 
-    -- handle messages emitted by the component; provide H.raise to simply
-    -- raise the Select messages to the parent.
-  , handleEvent
-      :: Event
+  -- handle messages emitted by the component; provide H.raise to simply
+  -- raise the Select messages to the parent.
+  , handleEvent ::
+      Event
       -> HalogenM st action slots msg m Unit
 
-    -- optionally handle input on parent re-renders
-  , receive
-      :: input
+  -- optionally handle input on parent re-renders
+  , receive ::
+      input
       -> Maybe action
 
-    -- perform some action when the component initializes.
-  , initialize
-      :: Maybe action
+  -- perform some action when the component initializes.
+  , initialize :: Maybe action
 
-    -- optionally perform some action on initialization. disabled by default.
-  , finalize
-      :: Maybe action
+  -- optionally perform some action on initialization. disabled by default.
+  , finalize :: Maybe action
   }
 
 type Spec' st input m = Spec st (Const Void) Void () input Void m
@@ -201,11 +201,11 @@ component mkInput spec = H.mkComponent
   initialState = Builder.build pipeline
     where
     pipeline =
-      Builder.modify (SProxy :: _ "search") (fromMaybe "")
-        >>> Builder.modify (SProxy :: _ "debounceTime") (fromMaybe mempty)
-        >>> Builder.insert (SProxy :: _ "debounceRef") Nothing
-        >>> Builder.insert (SProxy :: _ "visibility") Off
-        >>> Builder.insert (SProxy :: _ "highlightedIndex") Nothing
+      Builder.modify (Proxy :: _ "search") (fromMaybe "")
+        >>> Builder.modify (Proxy :: _ "debounceTime") (fromMaybe mempty)
+        >>> Builder.insert (Proxy :: _ "debounceRef") Nothing
+        >>> Builder.insert (Proxy :: _ "visibility") Off
+        >>> Builder.insert (Proxy :: _ "highlightedIndex") Nothing
 
 handleQuery
   :: forall st query action slots msg m a
@@ -244,7 +244,7 @@ handleAction handleAction' handleEvent = case _ of
 
     case st.inputType, ref of
       Text, Nothing -> unit <$ do
-        var   <- H.liftAff AVar.empty
+        var <- H.liftAff AVar.empty
         fiber <- H.liftAff $ forkAff do
           delay st.debounceTime
           AVar.put unit var
@@ -319,7 +319,7 @@ handleAction handleAction' handleEvent = case _ of
         preventIt
         for_ st.highlightedIndex \ix ->
           handle $ Select (Index ix) Nothing
-      otherKey -> pure unit
+      _ -> pure unit
 
   PreventClick ev ->
     H.liftEffect $ preventDefault $ ME.toEvent ev
@@ -348,7 +348,7 @@ handleAction handleAction' handleEvent = case _ of
     -- we know that the getItemCount function will only touch user fields,
     -- and that the state record contains *at least* the user fields, so
     -- this saves us from a set of unnecessary record deletions / modifications
-    userState :: State st -> {| st }
+    userState :: State st -> { | st }
     userState = unsafeCoerce
 
     lastIndex :: State st -> Int

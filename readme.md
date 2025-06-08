@@ -1,4 +1,7 @@
-# Select 
+# Select
+
+> [!NOTE]
+> This fork makes this package work with newer PureScript versions, by removing a stale `SProxy` import. This fork is here for personal use only. Use at your own risk.
 
 [![CircleCI](https://circleci.com/gh/citizennet/purescript-halogen-select/tree/master.svg?style=shield)](https://circleci.com/gh/citizennet/purescript-halogen-select/tree/master)
 [![Maintainer: thomashoneyman](https://img.shields.io/badge/maintainer-thomashoneyman-lightgrey.svg)](http://github.com/thomashoneyman)
@@ -31,18 +34,17 @@ For more information, try the [official documentation](https://citizennet.github
 
 The library provides essential behaviors for selection user interfaces as a group of Halogen components. But you won't find a single render function in the code. Instead, with the help of a few `setProps` helpers, you can write your HTML rendering however you'd like. You can freely include your own queries and the library will return them to be run. You can even use any data you want from your parent state in your render functions. The library manages user interaction, state, accessibility, and logic; you are responsible for rendering HTML depending on that state.
 
-1. Provide behaviors, not styles  
-Developers should be able to style and display dropdowns and typeaheads however they would like, rather than be forced to use particular CSS classes or re-implement the component with their HTML. This is accomplished with augmented render functions as described below. We provide the machinery; you provide the HTML and styles.
+1. Provide behaviors, not styles
+   Developers should be able to style and display dropdowns and typeaheads however they would like, rather than be forced to use particular CSS classes or re-implement the component with their HTML. This is accomplished with augmented render functions as described below. We provide the machinery; you provide the HTML and styles.
 
-2. Export the building blocks, not just the end result  
-Developers should be able to take a core set of behaviors and choose how they would like to handle them in their own version of the component. If you would like the typeahead's functionality but do something fancy with the selected items, you should be able to. Each building block is exported.
+2. Export the building blocks, not just the end result
+   Developers should be able to take a core set of behaviors and choose how they would like to handle them in their own version of the component. If you would like the typeahead's functionality but do something fancy with the selected items, you should be able to. Each building block is exported.
 
-3. Require minimal configuration  
-Instantiating a typeahead shouldn't require a 50-field configuration record. We require at minimum two things: the data to populate the menu and the HTML to render that data. The rest is taken care of by the component. You are responsible for handling two things: when an item was selected, and when the user has performed a new search. If you want to do even less, you can use one of our default implementations to drop in to your project.
+3. Require minimal configuration
+   Instantiating a typeahead shouldn't require a 50-field configuration record. We require at minimum two things: the data to populate the menu and the HTML to render that data. The rest is taken care of by the component. You are responsible for handling two things: when an item was selected, and when the user has performed a new search. If you want to do even less, you can use one of our default implementations to drop in to your project.
 
-4. Be accessible (Upcoming)  
-ARIA props and other features necessary for accessibility online should be handled properly without any setup.
-
+4. Be accessible (Upcoming)
+   ARIA props and other features necessary for accessibility online should be handled properly without any setup.
 
 # Rendering
 
@@ -61,9 +63,7 @@ For example, you can make your container compatible with the component with the 
 ]
 ```
 
-
 > Warning: If you provide any of the same events that we use for our behaviors, only yours will trigger, preventing that behavior from being applied. E.g., if you provide your own `HE.onValueInput` event on the element you're applying `setInputProps` to, you will end up overriding our search functionality for that input.
-
 
 ## Inspiration & Thanks
 

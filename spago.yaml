@@ -1,0 +1,9 @@
+package:
+  name: halogen-select
+  dependencies:
+    - halogen
+    - record
+workspace:
+  packageSet:
+    registry: 64.10.0
+  extraPackages: {}
